@@ -1,0 +1,42 @@
+services:
+  # 1. FastAPI Backend Service
+  - type: web
+    name: wanderlust-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    # Render maps the $PORT environment variable dynamically to our app
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      # Define all necessary API keys as required (so Render prompts you for them visually)
+      - key: MAIN_NODE_AGENT_MODEL
+        sync: false
+      - key: OPENWEATHERMAP_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GOOGLE_PLACES_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+
+  # 2. Streamlit Frontend Service
+  - type: web
+    name: wanderlust-frontend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "streamlit run streamlit_app.py --server.port $PORT --server.address 0.0.0.0"
+    envVars:
+      # Automatically pass the URL of the backend service to the Streamlit app!
+      - key: API_BACKEND_URL
+        fromService:
+          type: web
+          name: wanderlust-backend
+          envVarKey: RENDER_EXTERNAL_URL
