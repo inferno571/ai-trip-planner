@@ -39,6 +39,7 @@ class ModelLoader(BaseModel):
                 google_api_key=google_api_key,
                 temperature=0.7,
                 convert_system_message_to_human=True,
+                max_retries=10,
             )
         elif self.model_provider == "groq":
             print("Loading LLM from Groq..............")

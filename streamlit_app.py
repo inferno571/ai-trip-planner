@@ -642,7 +642,17 @@ if user_input:
     success = False
     try:
         payload = {"question": user_input}
-        response = requests.post(f"{BASE_URL}/query", json=payload, stream=True, timeout=300)
+        
+        from requests.adapters import HTTPAdapter
+        from urllib3.util.retry import Retry
+        
+        session = requests.Session()
+        retries = Retry(total=5, backoff_factor=1, status_forcelist=[429, 502, 503, 504])
+        adapter = HTTPAdapter(max_retries=retries)
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
+        
+        response = session.post(f"{BASE_URL}/query", json=payload, stream=True, timeout=300)
 
         if response.status_code == 200:
             answer = ""
